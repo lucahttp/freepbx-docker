@@ -1,0 +1,66 @@
+version: '3.1'
+
+services:
+  database:
+    container_name: database
+    restart: always
+    #volumes:
+    #   - './.data/wordpress:/var/www/html/'
+    build:
+      context: ./
+      dockerfile: mysql.dockerfile
+        
+    environment:
+      MYSQL_ROOT_PASSWORD: superpass
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+  pbx:
+    container_name: pbx
+    #volumes:
+    #   - './.data/wordpress:/var/www/html/'
+    depends_on:
+      - database
+    links:
+      - database
+
+    # docker run --name freepbx -d -p 25080:25080 -p 5060:5060/udp -p 18000-18500:18000-18500/udp -v /volume1/docker/freepbx/certs:/certs -v /volume1/docker/freepbx/html:/var/www/html -v /volume1/docker/freepbx/log:/var/log -v /volume1/docker/freepbx/data:/data --env 'DB_HOST=your_nas_ip' --env 'DB_PORT=3306' --env 'DB_NAME=freepbx' --env 'DB_USER=freepbx' --env 'DB_PASS=freepbxpass' --env 'HTTP_PORT=25080' --env 'DB_EMBEDDED=FALSE' --env 'RTP_START=18000' --env 'RTP_FINISH=18500' tiredofit/freepbx:15-3.3.1
+
+    restart: always
+    image: tiredofit/freepbx:15-3.3.1
+
+    environment:
+      - 'DB_HOST=database'
+      - 'DB_PORT=3306'
+      - 'DB_NAME=mydb'
+      - 'DB_USER=admin'
+      - 'DB_PASS=admin'
+      - 'HTTP_PORT=25080'
+      - 'DB_EMBEDDED=FALSE'
+      - 'RTP_START=18000'
+      - 'RTP_FINISH=18500'
+    volumes:
+      - './freepbx/certs:/certs'
+      - './freepbx/html:/var/www/html'
+      - './freepbx/log:/var/log'
+      - './freepbx/data:/data'
+    ports:
+      - "25080:25080"
+      - "5060:5060/udp"
+      - "18000-18500:18000-18500/udp"
+      # - './path/on/docker/host:/path/inside/container'  
+      # - .:/code
+
+
+
+    #environment:
+    #  DB_HOST_ENV: 127.0.0.1
+    #  DB_NAME_ENV: db
+    #  DB_USER_ENV: admin
+    #  DB_PASS_ENV:
+  # redis:
+  #   image: "redis:alpine"
+  # docker-compose up --force-recreate --renew-anon-volumes --build
+  # docker-compose up -d

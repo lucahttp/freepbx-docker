@@ -1,0 +1,77 @@
+version: '2'
+
+ services:
+
+  freepbx-app:
+
+    hostname: 192.168.3.100
+
+    container_name: freepbx-app
+
+    image: tiredofit/freepbx
+
+    network_mode: bridge
+
+    ports:
+
+      - 5060:5060/udp
+
+      # - 5160:5160
+
+      - 18000:20000/udp
+
+      - 25080:25080
+
+    volumes:
+
+      - ./certs:/certs
+
+      - ./data:/data
+
+      - ./logs:/www/logs
+
+      - ./data/www:/www/freepbx
+
+    environment:
+
+      - ZABBIX_HOSTNAME=freepbx-app
+
+      - RTP_START=18000
+
+      - RTP_FINISH=18500
+
+      - DB_HOST=192.168.3.100
+
+      - DB_NAME=asterisk
+
+      - DB_USER=asterisk
+
+      - DB_PASS=asteriskpass
+
+      - DEBUG_MODE=FALSE      
+
+    restart: always
+
+   freepbx-db:
+
+    container_name: freepbx-db
+
+    image: mariadb:5.5
+
+    network_mode: bridge
+
+    restart: always
+
+    volumes:
+
+      - ./db:/var/lib/mysql
+
+    environment:
+
+      - MYSQL_ROOT_PASSWORD=rootpassword
+
+      - MYSQL_DATABASE=asterisk
+
+      - MYSQL_USER=asterisk
+
+      - MYSQL_PASSWORD=asteriskpass
